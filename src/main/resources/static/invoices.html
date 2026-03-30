@@ -130,18 +130,22 @@
             },
 
             checkAuth() {
-                if (!localStorage.getItem('authToken')) {
-                    window.location.href = '/';
+                const token = sessionStorage.getItem('authToken');
+                if (!token) {
+                    window.location.href = 'index.html';
                 }
             },
 
             async loadInvoices() {
                 try {
                     const response = await fetch('/api/invoices', {
-                        headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+                        headers: { 'Authorization': `Bearer ${sessionStorage.getItem('authToken')}` }
                     });
                     if (response.ok) {
                         this.invoices = await response.json();
+                        console.log('Invoices loaded:', this.invoices);
+                    } else {
+                        console.error('Failed to load invoices:', response.status);
                     }
                 } catch (error) {
                     console.error('Error loading invoices:', error);
@@ -151,11 +155,13 @@
             async viewInvoice(id) {
                 try {
                     const response = await fetch(`/api/invoices/${id}`, {
-                        headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+                        headers: { 'Authorization': `Bearer ${sessionStorage.getItem('authToken')}` }
                     });
                     if (response.ok) {
                         this.selectedInvoice = await response.json();
                         this.showDetails = true;
+                    } else {
+                        console.error('Failed to load invoice details:', response.status);
                     }
                 } catch (error) {
                     console.error('Error loading invoice details:', error);
@@ -168,11 +174,11 @@
             },
 
             logout() {
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('user');
-                window.location.href = '/';
+                sessionStorage.removeItem('authToken');
+                sessionStorage.removeItem('user');
+                window.location.href = 'index.html';
             }
-        }
+        };
     }
 </script>
 </body>

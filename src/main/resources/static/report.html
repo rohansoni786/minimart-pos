@@ -68,7 +68,7 @@
             </div>
         </div>
 
-        <!-- Inventory Stats -->
+        <!-- Inventory Stats and Chart -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h3 class="text-lg font-semibold mb-4">Inventory Overview</h3>
@@ -145,20 +145,22 @@
             },
 
             checkAuth() {
-                if (!localStorage.getItem('authToken')) {
-                    window.location.href = '/';
+                const token = sessionStorage.getItem('authToken');
+                if (!token) {
+                    window.location.href = 'index.html';
                 }
             },
 
             async loadReport() {
                 try {
                     const response = await fetch('/api/reports/dashboard', {
-                        headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+                        headers: { 'Authorization': `Bearer ${sessionStorage.getItem('authToken')}` }
                     });
-
                     if (response.ok) {
                         this.reportData = await response.json();
                         this.updateChart();
+                    } else {
+                        console.error('Failed to load report:', response.status);
                     }
                 } catch (error) {
                     console.error('Error loading report:', error);
@@ -168,11 +170,12 @@
             async loadLowStockProducts() {
                 try {
                     const response = await fetch('/api/products/low-stock', {
-                        headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+                        headers: { 'Authorization': `Bearer ${sessionStorage.getItem('authToken')}` }
                     });
-
                     if (response.ok) {
                         this.lowStockProducts = await response.json();
+                    } else {
+                        console.error('Failed to load low stock products:', response.status);
                     }
                 } catch (error) {
                     console.error('Error loading low stock products:', error);
@@ -181,11 +184,9 @@
 
             updateChart() {
                 const ctx = document.getElementById('revenueChart').getContext('2d');
-
                 if (this.chart) {
                     this.chart.destroy();
                 }
-
                 this.chart = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -214,21 +215,14 @@
                         responsive: true,
                         maintainAspectRatio: true,
                         plugins: {
-                            legend: {
-                                position: 'top',
-                            },
-                            title: {
-                                display: true,
-                                text: 'Revenue Comparison'
-                            }
+                            legend: { position: 'top' },
+                            title: { display: true, text: 'Revenue Comparison' }
                         },
                         scales: {
                             y: {
                                 beginAtZero: true,
                                 ticks: {
-                                    callback: function(value) {
-                                        return '$' + value;
-                                    }
+                                    callback: function(value) { return '$' + value; }
                                 }
                             }
                         }
@@ -237,11 +231,11 @@
             },
 
             logout() {
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('user');
-                window.location.href = '/';
+                sessionStorage.removeItem('authToken');
+                sessionStorage.removeItem('user');
+                window.location.href = 'index.html';
             }
-        }
+        };
     }
 </script>
 </body>
